@@ -38,8 +38,40 @@ import {
   getUserMetrics
 } from '@/services/mockData';
 import { format, subDays } from 'date-fns';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 const Analytics = () => {
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isLoading) return; // Wait for auth to load
+    
+    if (!isAuthenticated || !user) {
+      navigate('/login');
+      return;
+    }
+  }, [user, isAuthenticated, navigate, isLoading]);
+
+  // Show loading while auth is initializing
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="max-w-7xl mx-auto p-6 pt-24 space-y-8">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Preparing analytics...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   const userSessions = getUserSessions(mockCurrentUser.id);
   const userMetrics = getUserMetrics(mockCurrentUser.id);
 
@@ -102,20 +134,15 @@ const Analytics = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       
-      <main className="max-w-7xl mx-auto p-6 space-y-8">
+      <main className="max-w-7xl mx-auto p-6 pt-24 space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Communication Analytics
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Deep insights into your gameplay communication patterns
-            </p>
-          </div>
-          <Badge variant="outline" className="text-sm">
-            {sessionsCount} Sessions Analyzed
-          </Badge>
+        <div className="text-center">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Communication Analytics
+          </h1>
+          <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
+            Deep insights into your gameplay communication patterns. Track your progress and identify areas for improvement.
+          </p>
         </div>
 
         {/* Key Metrics */}
@@ -124,44 +151,52 @@ const Analytics = () => {
             title="Avg Words/Session"
             value={averageMetrics.wordsSpoken}
             change={12}
-            icon={<Mic className="h-4 w-4" />}
+            icon={<Mic className="h-6 w-6" />}
             variant="success"
           />
           <MetricCard
             title="Team Coordination"
             value={`${averageMetrics.teamCoordination}%`}
             change={8}
-            icon={<Users className="h-4 w-4" />}
+            icon={<Users className="h-6 w-6" />}
             variant="success"
           />
           <MetricCard
             title="Commands Given"
             value={averageMetrics.commandsGiven}
             change={-5}
-            icon={<MessageSquare className="h-4 w-4" />}
+            icon={<MessageSquare className="h-6 w-6" />}
             variant="default"
           />
           <MetricCard
             title="Communication Gaps"
             value={averageMetrics.communicationGaps}
             change={-15}
-            icon={<Clock className="h-4 w-4" />}
+            icon={<Clock className="h-6 w-6" />}
             variant="success"
           />
         </div>
 
         {/* Analytics Tabs */}
         <Tabs defaultValue="trends" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="trends">Trends</TabsTrigger>
-            <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="comparison">Comparison</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-2xl mx-auto">
+            <TabsTrigger value="trends">
+              <TrendingUp className="mr-2 h-4 w-4" /> Trends
+            </TabsTrigger>
+            <TabsTrigger value="breakdown">
+              <PieChart className="mr-2 h-4 w-4" /> Breakdown
+            </TabsTrigger>
+            <TabsTrigger value="performance">
+              <Target className="mr-2 h-4 w-4" /> Performance
+            </TabsTrigger>
+            <TabsTrigger value="comparison">
+              <Users className="mr-2 h-4 w-4" /> Comparison
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="trends" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="glass">
                 <CardHeader>
                   <CardTitle>Communication Over Time</CardTitle>
                   <CardDescription>
@@ -171,24 +206,23 @@ const Analytics = () => {
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={sessionsOverTime}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis />
-                      <Tooltip />
-                      <Line 
-                        type="monotone" 
-                        dataKey="wordsSpoken" 
-                        stroke="hsl(217, 91%, 60%)" 
-                        strokeWidth={2}
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted) / 0.5)" />
+                      <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                      <YAxis stroke="hsl(var(--muted-foreground))" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))', 
+                          borderColor: 'hsl(var(--border))' 
+                        }}
                       />
+                      <Line type="monotone" dataKey="wordsSpoken" stroke="hsl(var(--primary))" strokeWidth={2} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>
-
-              <Card>
+              <Card className="glass">
                 <CardHeader>
-                  <CardTitle>Team Coordination Progress</CardTitle>
+                  <CardTitle>Team Coordination Trend</CardTitle>
                   <CardDescription>
                     Coordination score improvement
                   </CardDescription>
@@ -212,7 +246,7 @@ const Analytics = () => {
               </Card>
             </div>
 
-            <Card>
+            <Card className="glass">
               <CardHeader>
                 <CardTitle>Session Metrics Comparison</CardTitle>
                 <CardDescription>
@@ -222,11 +256,16 @@ const Analytics = () => {
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={sessionsOverTime}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="date" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="commandsGiven" fill="hsl(217, 91%, 60%)" name="Commands Given" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted) / 0.5)" />
+                    <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" />
+                    <YAxis stroke="hsl(var(--muted-foreground))" />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))', 
+                        borderColor: 'hsl(var(--border))' 
+                      }}
+                    />
+                    <Bar dataKey="commandsGiven" fill="hsl(var(--primary))" name="Commands Given" />
                     <Bar dataKey="communicationGaps" fill="hsl(0, 84%, 60%)" name="Communication Gaps" />
                   </BarChart>
                 </ResponsiveContainer>
@@ -236,45 +275,42 @@ const Analytics = () => {
 
           <TabsContent value="breakdown" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="glass">
                 <CardHeader>
-                  <CardTitle>Communication Type Distribution</CardTitle>
+                  <CardTitle>Communication Type Breakdown</CardTitle>
                   <CardDescription>
-                    Breakdown of your communication patterns
+                    Distribution of different communication categories
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={400}>
                     <PieChart>
                       <Pie
                         data={communicationBreakdown}
                         cx="50%"
                         cy="50%"
-                        outerRadius={80}
+                        labelLine={false}
+                        outerRadius={150}
+                        fill="#8884d8"
                         dataKey="value"
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                       >
                         {communicationBreakdown.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={entry.color} />
                         ))}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'hsl(var(--background))', 
+                          borderColor: 'hsl(var(--border))' 
+                        }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="grid grid-cols-2 gap-2 mt-4">
-                    {communicationBreakdown.map((item, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <div 
-                          className="w-3 h-3 rounded-full" 
-                          style={{ backgroundColor: item.color }}
-                        />
-                        <span className="text-xs">{item.name}: {item.value}%</span>
-                      </div>
-                    ))}
-                  </div>
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="glass">
                 <CardHeader>
                   <CardTitle>Voice Quality Metrics</CardTitle>
                   <CardDescription>
@@ -303,144 +339,42 @@ const Analytics = () => {
           </TabsContent>
 
           <TabsContent value="performance" className="space-y-6">
-            <Card>
+            <Card className="glass">
               <CardHeader>
-                <CardTitle>Performance Radar</CardTitle>
+                <CardTitle>Overall Performance Radar</CardTitle>
                 <CardDescription>
-                  Overall communication skill assessment
+                  A holistic view of your communication skills
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={400}>
-                  <RadarChart data={radarData}>
-                    <PolarGrid />
-                    <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12 }} />
-                    <PolarRadiusAxis />
-                    <Radar
-                      name="Skills"
-                      dataKey="value"
-                      stroke="hsl(217, 91%, 60%)"
-                      fill="hsl(217, 91%, 60%)"
-                      fillOpacity={0.2}
+                  <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                    <PolarGrid stroke="hsl(var(--muted) / 0.5)" />
+                    <PolarAngleAxis dataKey="subject" stroke="hsl(var(--muted-foreground))" />
+                    <PolarRadiusAxis angle={30} domain={[0, 100]} stroke="hsl(var(--muted-foreground))" />
+                    <Radar name="Performance" dataKey="value" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.6)" fillOpacity={0.6} />
+                    <Tooltip 
+                      contentStyle={{ 
+                        backgroundColor: 'hsl(var(--background))', 
+                        borderColor: 'hsl(var(--border))' 
+                      }}
                     />
                   </RadarChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Strengths</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-success"></div>
-                    <span className="text-sm">Voice clarity (88%)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-success"></div>
-                    <span className="text-sm">Team coordination (85%)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-success"></div>
-                    <span className="text-sm">Communication frequency (78%)</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Areas to Improve</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-warning"></div>
-                    <span className="text-sm">Leadership skills (68%)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-warning"></div>
-                    <span className="text-sm">Strategic vocabulary (72%)</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 rounded-full bg-warning"></div>
-                    <span className="text-sm">Response time (75%)</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Next Goals</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Target className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Increase callouts by 20%</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Target className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Reduce silence gaps</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Target className="w-4 h-4 text-primary" />
-                    <span className="text-sm">Improve strategic vocabulary</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
 
           <TabsContent value="comparison" className="space-y-6">
-            <Card>
+            <Card className="glass">
               <CardHeader>
-                <CardTitle>Benchmark Comparison</CardTitle>
+                <CardTitle>Coming Soon: Community Comparison</CardTitle>
                 <CardDescription>
-                  How you compare to similar skill level players
+                  Compare your stats with other players of similar skill levels.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Words per session</span>
-                      <span className="text-sm text-muted-foreground">+12% above average</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-primary h-2 rounded-full" style={{ width: '75%' }}></div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Team coordination</span>
-                      <span className="text-sm text-muted-foreground">+8% above average</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-accent h-2 rounded-full" style={{ width: '85%' }}></div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Strategic vocabulary</span>
-                      <span className="text-sm text-muted-foreground">-5% below average</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-warning h-2 rounded-full" style={{ width: '65%' }}></div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Response time</span>
-                      <span className="text-sm text-muted-foreground">+15% above average</span>
-                    </div>
-                    <div className="w-full bg-secondary rounded-full h-2">
-                      <div className="bg-success h-2 rounded-full" style={{ width: '80%' }}></div>
-                    </div>
-                  </div>
-                </div>
+              <CardContent className="text-center py-16">
+                <p className="text-muted-foreground">This feature is under development.</p>
               </CardContent>
             </Card>
           </TabsContent>

@@ -6,65 +6,60 @@
 
 @layer base {
   :root {
-    /* Gaming Dark Theme */
-    --background: 220 13% 8%;
-    --foreground: 220 9% 95%;
+    /* Clutch Theme - Based on wixsite */
+    --background: 220 10% 4%; /* Near black */
+    --foreground: 0 0% 98%; /* White */
 
-    --card: 220 13% 11%;
-    --card-foreground: 220 9% 95%;
+    --card: 220 10% 8%; /* Dark gray for cards */
+    --card-foreground: 0 0% 98%;
 
-    --popover: 220 13% 11%;
-    --popover-foreground: 220 9% 95%;
+    --popover: 220 10% 8%;
+    --popover-foreground: 0 0% 98%;
 
-    /* Neon gaming accent - electric blue */
-    --primary: 217 91% 60%;
-    --primary-foreground: 220 13% 8%;
+    /* New primary color: #9b1440 */
+    --primary: 339 76% 34%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 220 13% 15%;
-    --secondary-foreground: 220 9% 95%;
+    --secondary: 220 10% 12%;
+    --secondary-foreground: 0 0% 98%;
 
-    --muted: 220 13% 15%;
-    --muted-foreground: 220 9% 65%;
+    --muted: 220 10% 12%;
+    --muted-foreground: 0 0% 60%;
 
-    /* Gaming accent - purple/magenta */
-    --accent: 280 100% 70%;
-    --accent-foreground: 220 13% 8%;
+    /* Using the same color for accent */
+    --accent: 339 76% 34%;
+    --accent-foreground: 0 0% 98%;
 
-    /* Gaming red for destructive */
+    /* Red for destructive actions */
     --destructive: 0 84% 60%;
-    --destructive-foreground: 220 9% 95%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 13% 20%;
-    --input: 220 13% 15%;
-    --ring: 217 91% 60%;
+    --border: 220 10% 15%;
+    --input: 220 10% 12%;
+    --ring: 339 76% 34%;
 
-    /* Gaming success green */
+    /* Success green */
     --success: 142 76% 36%;
-    --success-foreground: 220 9% 95%;
+    --success-foreground: 0 0% 98%;
 
-    /* Gaming warning orange */
+    /* Warning orange */
     --warning: 38 92% 50%;
-    --warning-foreground: 220 13% 8%;
+    --warning-foreground: 220 10% 4%;
 
     --radius: 0.75rem;
+    
+    /* Sidebar theme */
+    --sidebar-background: 220 10% 6%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 339 76% 34%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 220 10% 12%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 220 10% 15%;
+    --sidebar-ring: 339 76% 34%;
 
-    /* Gaming gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%), hsl(280 100% 70%));
-    --gradient-secondary: linear-gradient(135deg, hsl(220 13% 15%), hsl(220 13% 20%));
-    
-    /* Gaming glow effects */
-    --glow-primary: 0 0 20px hsl(217 91% 60% / 0.3);
-    --glow-accent: 0 0 20px hsl(280 100% 70% / 0.3);
-    
-    /* Sidebar gaming theme */
-    --sidebar-background: 220 13% 10%;
-    --sidebar-foreground: 220 9% 90%;
-    --sidebar-primary: 217 91% 60%;
-    --sidebar-primary-foreground: 220 13% 8%;
-    --sidebar-accent: 220 13% 15%;
-    --sidebar-accent-foreground: 220 9% 90%;
-    --sidebar-border: 220 13% 18%;
-    --sidebar-ring: 217 91% 60%;
+    /* Optional lighter primary for gradients (keeps hue) */
+    --primary-soft: 339 76% 44%;
   }
 }
 
@@ -75,5 +70,138 @@
 
   body {
     @apply bg-background text-foreground;
+    /* Soft radial glow and subtle grid overlay */
+    background-image:
+      radial-gradient(1200px 600px at 20% -10%, hsla(var(--primary), 0.12), transparent 60%),
+      radial-gradient(900px 500px at 120% 20%, hsla(var(--primary), 0.10), transparent 60%),
+      linear-gradient(to bottom, rgba(255,255,255,0.02), rgba(255,255,255,0) 25%),
+      linear-gradient(transparent 0, transparent 39px, hsla(var(--border), 0.22) 40px),
+      linear-gradient(90deg, transparent 0, transparent 39px, hsla(var(--border), 0.22) 40px);
+    background-size: auto, auto, auto, 40px 40px, 40px 40px;
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+
+  ::selection {
+    background: hsla(var(--primary), 0.35);
+    color: hsl(var(--primary-foreground));
+  }
+
+  /* Modern scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.04);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, hsla(var(--primary), 0.6), hsla(var(--primary-soft), 0.6));
+    border-radius: 9999px;
+    border: 2px solid rgba(0,0,0,0.25);
+  }
+}
+
+@layer components {
+  /* Helpful utility classes for the new aesthetic */
+  .glass {
+    @apply bg-card/60 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.12)];
+  }
+  .glass-hover {
+    @apply transition-all hover:border-white/20 hover:shadow-[0_8px_30px_rgba(155,20,64,0.30)];
+  }
+  .gradient-primary {
+    @apply bg-gradient-to-r from-primary to-[hsl(var(--primary-soft))];
+  }
+  .text-gradient-primary {
+    @apply bg-gradient-to-r from-primary to-[hsl(var(--primary-soft))] bg-clip-text text-transparent;
+  }
+
+  /* Professional Black & White Image Styling */
+  .bg-professional-bw {
+    filter: 
+      grayscale(100%) 
+      contrast(1.2) 
+      brightness(0.7) 
+      sepia(0.1);
+  }
+  
+  /* Enhanced B&W with subtle blue tint for gaming aesthetic */
+  .bg-elite-bw {
+    filter: 
+      grayscale(100%) 
+      contrast(1.3) 
+      brightness(0.6) 
+      hue-rotate(200deg) 
+      saturate(0.3) 
+      sepia(0.15);
+  }
+
+  /* High contrast dramatic B&W */
+  .bg-dramatic-bw {
+    filter: 
+      grayscale(100%) 
+      contrast(1.4) 
+      brightness(0.5) 
+      sepia(0.05);
+  }
+
+  /* Login background with professional overlay */
+  .login-bg-professional {
+    background-image: url('/103466_31257134_496181287.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: 
+      grayscale(100%) 
+      contrast(1.25) 
+      brightness(0.65) 
+      sepia(0.08);
+    position: relative;
+  }
+
+  .login-bg-professional::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(135deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 50%, rgba(0,0,0,0.8) 100%),
+      radial-gradient(circle at 30% 40%, rgba(155,20,64,0.15) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Elite gaming background with grid overlay */
+  .login-bg-elite {
+    background-image: url('/103466_31257134_496181287.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: 
+      grayscale(100%) 
+      contrast(1.3) 
+      brightness(0.6) 
+      hue-rotate(200deg) 
+      saturate(0.2) 
+      sepia(0.12);
+    position: relative;
+  }
+
+  .login-bg-elite::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      linear-gradient(135deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.3) 40%, rgba(0,0,0,0.85) 100%),
+      radial-gradient(circle at 25% 25%, rgba(155,20,64,0.12) 0%, transparent 45%),
+      linear-gradient(transparent 0, transparent 49px, rgba(255,255,255,0.03) 50px),
+      linear-gradient(90deg, transparent 0, transparent 49px, rgba(255,255,255,0.03) 50px);
+    background-size: auto, auto, 50px 50px, 50px 50px;
+    pointer-events: none;
   }
 }

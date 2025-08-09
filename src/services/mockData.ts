@@ -32,6 +32,9 @@ export interface Metrics {
   communicationGaps: number;
   speakingTime: number; // in seconds
   analysisDate: string;
+  playerMetrics?: { playerId: string; wordsSpoken: number }[];
+  volumeBreakdown?: { high: number; medium: number; low: number }; // percentages
+  toxicityScore?: number; // 0-100
 }
 
 export interface Feedback {
@@ -143,7 +146,14 @@ export const mockMetrics: Metrics[] = [
     teamCoordination: 78,
     communicationGaps: 12,
     speakingTime: 840,
-    analysisDate: '2024-02-01T17:00:00Z'
+    analysisDate: '2024-02-01T17:00:00Z',
+    playerMetrics: [
+      { playerId: '1', wordsSpoken: 450 },
+      { playerId: '2', wordsSpoken: 500 },
+      { playerId: '3', wordsSpoken: 300 },
+    ],
+    volumeBreakdown: { high: 40, medium: 50, low: 10 },
+    toxicityScore: 15,
   },
   {
     sessionId: 's2',
@@ -155,7 +165,14 @@ export const mockMetrics: Metrics[] = [
     teamCoordination: 65,
     communicationGaps: 18,
     speakingTime: 620,
-    analysisDate: '2024-01-28T20:15:00Z'
+    analysisDate: '2024-01-28T20:15:00Z',
+    playerMetrics: [
+      { playerId: '1', wordsSpoken: 300 },
+      { playerId: '2', wordsSpoken: 290 },
+      { playerId: '3', wordsSpoken: 300 },
+    ],
+    volumeBreakdown: { high: 20, medium: 70, low: 10 },
+    toxicityScore: 25,
   },
   {
     sessionId: 's3',
@@ -167,7 +184,14 @@ export const mockMetrics: Metrics[] = [
     teamCoordination: 82,
     communicationGaps: 5,
     speakingTime: 380,
-    analysisDate: '2024-01-25T20:45:00Z'
+    analysisDate: '2024-01-25T20:45:00Z',
+    playerMetrics: [
+      { playerId: '1', wordsSpoken: 150 },
+      { playerId: '2', wordsSpoken: 145 },
+      { playerId: '3', wordsSpoken: 150 },
+    ],
+    volumeBreakdown: { high: 30, medium: 60, low: 10 },
+    toxicityScore: 10,
   },
   {
     sessionId: 's4',
@@ -179,7 +203,14 @@ export const mockMetrics: Metrics[] = [
     teamCoordination: 88,
     communicationGaps: 8,
     speakingTime: 980,
-    analysisDate: '2024-02-02T21:45:00Z'
+    analysisDate: '2024-02-02T21:30:00Z',
+    playerMetrics: [
+      { playerId: '1', wordsSpoken: 500 },
+      { playerId: '2', wordsSpoken: 600 },
+      { playerId: '3', wordsSpoken: 350 },
+    ],
+    volumeBreakdown: { high: 35, medium: 55, low: 10 },
+    toxicityScore: 18,
   }
 ];
 
@@ -221,11 +252,68 @@ export const mockFeedback: Feedback[] = [
     category: 'communication',
     priority: 'low',
     createdAt: '2024-01-25T21:00:00Z'
+  },
+  {
+    id: 'f5',
+    sessionId: 's2',
+    type: 'coach',
+    content: 'Consider watching professional matches to understand better positioning and utility usage.',
+    category: 'strategy',
+    priority: 'medium',
+    createdAt: '2024-01-28T20:30:00Z',
+    createdBy: '4'
   }
 ];
 
-// Utility functions
-export const getUserSessions = (userId: string): Session[] => {
+export const tasksToDo = [
+  {
+    id: 1,
+    name: 'Review callouts for "Mid"',
+    players: [
+      { id: 1, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' },
+      { id: 2, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+    ],
+    urgency: 'High',
+    completion: 60,
+    icon: 'volume-2'
+  },
+  {
+    id: 2,
+    name: 'Improve economy management',
+    players: [
+      { id: 3, avatar: 'https://i.pravatar.cc/150?u=a04258114e29026702d' },
+    ],
+    urgency: 'Medium',
+    completion: 10,
+    icon: 'bar-chart-2'
+  },
+  {
+    id: 3,
+    name: 'Practice post-plant positions',
+    players: [
+      { id: 1, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026024d' },
+      { id: 4, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026706d' },
+      { id: 5, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026707d' },
+    ],
+    urgency: 'Low',
+    completion: 100,
+    icon: 'target'
+  },
+  {
+    id: 4,
+    name: 'Work on utility usage for "A site"',
+    players: [
+      { id: 2, avatar: 'https://i.pravatar.cc/150?u=a042581f4e29026704d' },
+      { id: 3, avatar: 'https://i.pravatar.cc/150?u=a04258114e29026702d' },
+    ],
+    urgency: 'High',
+    completion: 25,
+    icon: 'git-commit'
+  },
+];
+
+// Helper functions to get data
+export const getUserSessions = (userId: string) => {
   return mockSessions.filter(session => session.userId === userId);
 };
 
@@ -233,15 +321,13 @@ export const getSessionMetrics = (sessionId: string): Metrics | undefined => {
   return mockMetrics.find(metrics => metrics.sessionId === sessionId);
 };
 
-export const getSessionFeedback = (sessionId: string): Feedback[] => {
-  return mockFeedback.filter(feedback => feedback.sessionId === sessionId);
+export const getUserMetrics = (userId: string) => {
+  const sessionIds = mockSessions.filter(s => s.userId === userId).map(s => s.id);
+  return mockMetrics.filter(m => sessionIds.includes(m.sessionId));
 };
 
-export const getUserMetrics = (userId: string): Metrics[] => {
-  const userSessions = getUserSessions(userId);
-  return mockMetrics.filter(metrics => 
-    userSessions.some(session => session.id === metrics.sessionId)
-  );
+export const getSessionFeedback = (sessionId: string) => {
+  return mockFeedback.filter(f => f.sessionId === sessionId);
 };
 
 // Mock authentication service

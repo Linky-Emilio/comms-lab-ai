@@ -44,29 +44,29 @@ const MetricCard = ({
     : '';
 
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${cardClassName}`}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <Card className={`rounded-2xl border-white/10 bg-card/60 backdrop-blur-xl hover:shadow-[0_12px_40px_rgba(155,20,64,0.15)] transition-all ${cardClassName}`}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <CardTitle className="text-xs font-medium tracking-widest uppercase text-muted-foreground/80">
           {title}
         </CardTitle>
         {icon && (
-          <div className="text-muted-foreground">
+          <div className="p-2 rounded-xl gradient-primary text-primary-foreground/90 shadow-sm">
             {icon}
           </div>
         )}
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-foreground mb-1">
+        <div className="text-3xl font-extrabold tracking-tight text-foreground mb-1">
           {value}
         </div>
         {description && (
-          <p className="text-xs text-muted-foreground mb-2">
+          <p className="text-xs text-muted-foreground/80 mb-3">
             {description}
           </p>
         )}
         {change !== undefined && (
-          <div className="flex items-center space-x-1">
-            <Badge variant={getTrendColor()} className="text-xs px-1 py-0">
+          <div className="flex items-center justify-between">
+            <Badge variant={getTrendColor()} className="text-[10px] px-1.5 py-0.5 rounded-md">
               {getTrendIcon()}
               <span className="ml-1">
                 {Math.abs(change)}% {changeLabel || 'vs last session'}
